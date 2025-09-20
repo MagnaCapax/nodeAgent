@@ -1,7 +1,7 @@
 # nodeAgent
 
 ## Overview
-nodeAgent is a privacy-first monitoring daemon tailored for bare-metal servers operated by Pulsed Media / Magna Capax Finland Oy. It captures hardware health and utilization signals required for fleet operations while keeping raw data on the node. Only essential rollups are transmitted to the nodeAgentCollector service, typically reachable on the local IPv4 /24 at the `.2` address. The agent is designed to live in `/opt/mcxNodeAgent`, run via cron-backed collection routines, and operate without distro-specific assumptions.
+nodeAgent is a privacy-first monitoring daemon tailored for bare-metal servers operated by Pulsed Media / Magna Capax Finland Oy. It captures hardware health and utilization signals required for fleet operations while keeping raw data on the node. Only essential rollups are transmitted to the nodeAgentCollector service (maintained in a separate repository), typically reachable on the local IPv4 /24 at the `.2` address. The agent is designed to live in `/opt/mcxNodeAgent`, run via cron-backed collection routines, and operate without distro-specific assumptions.
 
 Operators retain full control: removing `/opt/mcxNodeAgent` (or `/opt/nodeAgent` on legacy deployments) disables telemetry immediately.
 
@@ -80,7 +80,7 @@ This repository now ships the scaffolding under `mcxNodeAgent/` mirroring the in
 - The agent performs zero in-agent analytics—interpretation is deferred entirely to the collector backend.
 - Raw counter snapshots (jiffies, byte counts, SMART attributes, etc.) accompany every metric so the backend receives the same evidence the agent observed.
 - When `busy_thresholds` are configured the agent samples system state (load average, gateway ping) and probabilistically skips heavy collectors (default 90% skip) to avoid overloading production workloads.
-- A companion collector scaffold (`nodeAgentCollector/`) stores both the raw envelope and decrypted payload, ensuring downstream pipelines can replay the exact data the agent produced.
+- A companion collector (`nodeAgentCollector`) stores both the raw envelope and decrypted payload, ensuring downstream pipelines can replay the exact data the agent produced. The collector now lives in its own repository; see the “Collector Companion” section below.
 - Set `log_format` to `json` in `conf/agent.json` when structured logging is required for aggregation pipelines; leave it as `text` for human-friendly output.
 
 ## Architecture Outline
@@ -203,7 +203,7 @@ Re-running the installer must be safe on partially configured systems and should
 10. Container/runtime inventory (running Dockerd/Podman workloads) for consolidation planning.
 
 ## Collector Companion
-- A scaffolded ingestion service (`nodeAgentCollector/`) accompanies this repository. It provides API endpoints, database schemas, and installer helpers to accept agent telemetry. See `nodeAgentCollector/README.md` for deployment guidance.
+- nodeAgentCollector is maintained in a standalone repository that provides API endpoints, database schemas, and installer helpers to accept agent telemetry. Consult that project’s README for deployment guidance and keep schemas in sync with the copies under `schemas/` here.
 
 ## Development Notes
 - Favor Bash for automation; escalate to PHP only when workflows become unwieldy but remain within repo standards.

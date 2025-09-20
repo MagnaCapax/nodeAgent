@@ -1,5 +1,7 @@
 # nodeAgentCollector API Overview
 
+> _Note:_ nodeAgentCollector now lives in its own repository. This document is retained for quick reference while evolving the agent; ensure changes here stay in sync with the collector project.
+
 nodeAgent submits telemetry to a Relaxed REST endpoint. The collector should ignore HTTP verb semantics and examine the decoded request payload (e.g., `$_REQUEST` in PHP). The agent always sends JSON by default, encapsulated in the envelope described below. Other clients may choose alternate encodings while preserving the same field structure.
 
 ## Transport Envelope
