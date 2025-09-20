@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CPU Metrics",
+  "type": "object",
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "usage_percent": { "type": "number" },
+    "core_count": { "type": "integer", "minimum": 1 },
+    "architecture": { "type": "string" },
+    "model": { "type": "string" },
+    "hostname": { "type": "string" },
+    "profiling": {
+      "type": "object",
+      "properties": {
+        "duration_ms": { "type": "number" },
+        "sampling_interval_s": { "type": "number" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["timestamp", "usage_percent", "core_count"],
+  "additionalProperties": true
+}

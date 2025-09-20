@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Storage Latency Metrics",
+  "type": "object",
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "target": { "type": "string" },
+    "available": { "type": "boolean" },
+    "requests": {
+      "type": "object",
+      "properties": {
+        "count": { "type": "integer" },
+        "duration_value": { "type": "number" },
+        "duration_unit": { "type": "string" },
+        "bytes_read_kb": { "type": "number" },
+        "throughput": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "latency": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "object",
+          "properties": { "value": { "type": "number" }, "unit": { "type": "string" } },
+          "required": ["value", "unit"],
+          "additionalProperties": false
+        },
+        "avg": { "$ref": "#/properties/latency/properties/min" },
+        "max": { "$ref": "#/properties/latency/properties/min" },
+        "mdev": { "$ref": "#/properties/latency/properties/min" }
+      },
+      "additionalProperties": false
+    },
+    "profiling": {
+      "type": "object",
+      "properties": {
+        "duration_ms": { "type": "number" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["timestamp", "target", "available"],
+  "additionalProperties": true
+}

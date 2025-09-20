@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "nodeAgentCollector Envelope",
+  "type": "object",
+  "properties": {
+    "version": { "type": "string" },
+    "encrypted": { "type": "boolean" },
+    "encryption": {
+      "type": "object",
+      "required": ["method", "key_hint", "fingerprint"],
+      "properties": {
+        "method": { "type": "string", "enum": ["gpg-symmetric", "none"] },
+        "key_hint": { "type": "string" },
+        "fingerprint": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "ciphertext": { "type": "string" },
+    "payload": { "type": "object" },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "profiling": {
+          "type": "object",
+          "properties": {
+            "encryption_ms": { "type": "number" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "required": ["version", "encrypted"],
+  "oneOf": [
+    {
+      "properties": { "encrypted": { "const": true } },
+      "required": ["ciphertext", "encryption"]
+    },
+    {
+      "properties": { "encrypted": { "const": false } },
+      "required": ["payload"]
+    }
+  ],
+  "additionalProperties": true
+}

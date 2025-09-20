@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Network Metrics",
+  "type": "object",
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "interface": { "type": "string" },
+          "rx_bytes_per_sec": { "type": "number" },
+          "tx_bytes_per_sec": { "type": "number" },
+          "operstate": { "type": "string" }
+        },
+        "required": ["interface"],
+        "additionalProperties": true
+      }
+    },
+    "pings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "target": { "type": "string" },
+          "avg_rtt_ms": { "type": "number" },
+          "packet_loss": { "type": "string" },
+          "exit_status": { "type": "integer" }
+        },
+        "required": ["name", "target", "exit_status"],
+        "additionalProperties": true
+      }
+    },
+    "profiling": {
+      "type": "object",
+      "properties": {
+        "duration_ms": { "type": "number" },
+        "interfaces_observed": { "type": "integer" },
+        "ping_targets": { "type": "integer" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["timestamp", "interfaces"],
+  "additionalProperties": true
+}

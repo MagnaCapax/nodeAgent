@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Memory Metrics",
+  "type": "object",
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "mem_total_kb": { "type": "integer", "minimum": 0 },
+    "mem_available_kb": { "type": "integer", "minimum": 0 },
+    "mem_used_kb": { "type": "integer", "minimum": 0 },
+    "mem_usage_percent": { "type": "number", "minimum": 0 },
+    "swap_total_kb": { "type": "integer", "minimum": 0 },
+    "swap_free_kb": { "type": "integer", "minimum": 0 },
+    "swap_used_kb": { "type": "integer", "minimum": 0 },
+    "swap_usage_percent": { "type": "number", "minimum": 0 },
+    "profiling": {
+      "type": "object",
+      "properties": {
+        "duration_ms": { "type": "number" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["timestamp", "mem_total_kb", "mem_available_kb"],
+  "additionalProperties": true
+}

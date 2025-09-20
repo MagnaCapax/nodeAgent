@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Storage Metrics",
+  "type": "object",
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "devices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "device": { "type": "string" },
+          "tps": { "type": "number" },
+          "kb_read_s": { "type": "number" },
+          "kb_wrtn_s": { "type": "number" },
+          "reads_completed": { "type": "integer" },
+          "writes_completed": { "type": "integer" }
+        },
+        "required": ["device"],
+        "additionalProperties": true
+      }
+    },
+    "profiling": {
+      "type": "object",
+      "properties": {
+        "duration_ms": { "type": "number" },
+        "iostat_used": { "type": "boolean" },
+        "sample_window_s": { "type": "number" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["timestamp", "devices"],
+  "additionalProperties": true
+}

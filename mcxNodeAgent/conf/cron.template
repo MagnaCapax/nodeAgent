@@ -1,0 +1,8 @@
+# mcxNodeAgent cron schedule
+# Generated automatically; adjust intervals through conf/agent.json.
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+*/##CRON_CORE_INTERVAL## * * * * root ##CRON_CMD_COLLECT##
+*/##CRON_IOSTAT_INTERVAL## * * * * root ##CRON_CMD_STORAGE##
+*/##CRON_SUBMIT_INTERVAL## * * * * root ##CRON_CMD_SUBMIT##
+@reboot root ##CRON_CMD_COLLECT##
