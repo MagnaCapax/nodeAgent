@@ -7,19 +7,17 @@ declare(strict_types=1);
 
 use function McxNodeAgent\buildContext;
 use function McxNodeAgent\resolvePingTargets;
-use function McxNodeAgent\commandAvailable;
 use function McxNodeAgent\writeJson;
 use function McxNodeAgent\logInfo;
 use function McxNodeAgent\logWarn;
 use function McxNodeAgent\logError;
 use function McxNodeAgent\profilingDurationMs;
+use function McxNodeAgent\shouldRunCollector;
 use function McxNodeAgent\ensureCommand;
-use function McxNodeAgent\metricEnabled;
-use function McxNodeAgent\shouldThrottleCollection;
 
-require_once __DIR__ . '/../lib/bootstrap.php';
-require_once __DIR__ . '/../lib/logger.php';
-require_once __DIR__ . '/../lib/tooling.php';
+require_once __DIR__ . '/../../lib/bootstrap.php';
+require_once __DIR__ . '/../../lib/logger.php';
+require_once __DIR__ . '/../../lib/tooling.php';
 
 $context = buildContext();
 $config = $context['config'];
@@ -27,12 +25,7 @@ $stateFile = $context['paths']['state'] . '/network.json';
 
 $startedAt = microtime(true);
 
-if (!metricEnabled($config, 'network')) {
-    logInfo($context, 'Network collector disabled via configuration; skipping');
-    exit(0);
-}
-
-if (shouldThrottleCollection($context, 'network')) {
+if (!shouldRunCollector($context, 'network', 'Network')) {
     exit(0);
 }
 

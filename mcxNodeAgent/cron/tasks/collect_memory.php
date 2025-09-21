@@ -10,11 +10,10 @@ use function McxNodeAgent\writeJson;
 use function McxNodeAgent\logInfo;
 use function McxNodeAgent\logError;
 use function McxNodeAgent\profilingDurationMs;
-use function McxNodeAgent\metricEnabled;
-use function McxNodeAgent\shouldThrottleCollection;
+use function McxNodeAgent\shouldRunCollector;
 
-require_once __DIR__ . '/../lib/bootstrap.php';
-require_once __DIR__ . '/../lib/logger.php';
+require_once __DIR__ . '/../../lib/bootstrap.php';
+require_once __DIR__ . '/../../lib/logger.php';
 
 $context = buildContext();
 $config = $context['config'];
@@ -22,12 +21,7 @@ $stateFile = $context['paths']['state'] . '/memory.json';
 
 $startedAt = microtime(true);
 
-if (!metricEnabled($config, 'memory')) {
-    logInfo($context, 'Memory collector disabled via configuration; skipping');
-    exit(0);
-}
-
-if (shouldThrottleCollection($context, 'memory')) {
+if (!shouldRunCollector($context, 'memory', 'Memory')) {
     exit(0);
 }
 

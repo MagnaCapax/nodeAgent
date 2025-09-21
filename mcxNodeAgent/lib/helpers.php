@@ -70,6 +70,28 @@ function metricEnabled(array $config, string $metric): bool
 }
 
 /**
+ * Check configuration toggle and throttle guards before running a collector.
+ */
+function shouldRunCollector(array $context, string $metric, string $label): bool
+{
+    $config = $context['config'] ?? [];
+    if (!metricEnabled($config, $metric)) {
+        if (function_exists(__NAMESPACE__ . '\logInfo')) {
+            logInfo($context, sprintf('%s collector disabled via configuration; skipping', $label));
+        } else {
+            error_log(sprintf('%s collector disabled via configuration; skipping', $label));
+        }
+        return false;
+    }
+
+    if (shouldThrottleCollection($context, $metric)) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * Decide whether an expensive collector should skip execution due to load.
  */
 function shouldThrottleCollection(array $context, string $collector): bool

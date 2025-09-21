@@ -1,9 +1,12 @@
 <?php
-// Cron templating helpers for mcxNodeAgent.
+// Cron templating and orchestration helpers for mcxNodeAgent.
+// Provides cron file rendering along with shared runner utilities.
 
 declare(strict_types=1);
 
 namespace McxNodeAgent;
+
+require_once __DIR__ . '/logger.php';
 
 function renderCronTemplate(array $options): string
 {
@@ -43,4 +46,69 @@ function loadCronTemplate(string $path): string
         throw new \RuntimeException('Cron template missing at ' . $path);
     }
     return file_get_contents($path) ?: '';
+}
+
+/**
+ * Parse CLI arguments for --metrics filters, returning null when unused.
+ */
+function parseCronFilters(array $argv, string $flag = '--metrics='): ?array
+{
+    foreach ($argv as $argument) {
+        if (!str_starts_with($argument, $flag)) {
+            continue;
+        }
+        $raw = substr($argument, strlen($flag));
+        $entries = array_filter(array_map('trim', explode(',', $raw)));
+        return !empty($entries) ? array_values($entries) : null;
+    }
+
+    return null;
+}
+
+/**
+ * Filter a named script map against the requested metric list.
+ */
+function selectCronScripts(array $map, ?array $filters): array
+{
+    if ($filters === null || $filters === []) {
+        return $map;
+    }
+
+    $selected = [];
+    foreach ($filters as $name) {
+        if (isset($map[$name])) {
+            $selected[$name] = $map[$name];
+        }
+    }
+
+    return $selected;
+}
+
+/**
+ * Execute a cron task script and return its exit code (-1 when missing).
+ */
+function runCronScript(
+    array $context,
+    string $label,
+    string $script,
+    array $arguments = [],
+    ?string $phpBinary = null,
+    bool $treatFailureAsError = false
+): int {
+    if (!is_file($script) || !is_readable($script)) {
+        logWarn($context, sprintf('%s script missing: %s', $label, basename($script)));
+        return -1;
+    }
+
+    $command = buildCronCommand($phpBinary ?? PHP_BINARY, $script, $arguments);
+    $buffer = [];
+    $exitCode = 0;
+    exec($command, $buffer, $exitCode);
+
+    if ($exitCode !== 0) {
+        $logger = $treatFailureAsError ? __NAMESPACE__ . '\\logError' : __NAMESPACE__ . '\\logWarn';
+        $logger($context, sprintf('%s returned exit code %d', $label, $exitCode));
+    }
+
+    return $exitCode;
 }

@@ -15,6 +15,7 @@ use function McxNodeAgent\readJsonOrEmpty;
 use function McxNodeAgent\writeJson;
 use function McxNodeAgent\profilingDurationMs;
 use function McxNodeAgent\shouldThrottleCollection;
+use function McxNodeAgent\shouldRunCollector;
 
 final class HelpersEdgeCasesTest extends TestCase
 {
@@ -26,6 +27,7 @@ final class HelpersEdgeCasesTest extends TestCase
         $this->assertJsonHelpersTolerateCorruption();
         $this->assertProfilingDurationNeverNegative();
         $this->assertThrottleHonoursMaintenanceWindow();
+        $this->assertShouldRunCollectorHonoursConfiguration();
     }
 
     private function assertNormalizeMetricsHandlesUnexpectedKeys(): void
@@ -87,10 +89,34 @@ final class HelpersEdgeCasesTest extends TestCase
     {
         // Maintenance mode should force collectors to bail out immediately.
         $context = [
-            'config' => ['maintenance_until' => time() + 60, 'busy_thresholds' => []],
+            'config' => ['maintenance_until' => time() + 60, 'busy_thresholds' => ['load1' => null, 'ping_ms' => null, 'skip_probability' => 0.9]],
             'paths' => ['log_dir' => sys_get_temp_dir(), 'state' => sys_get_temp_dir()],
         ];
         $shouldSkip = shouldThrottleCollection($context, 'cpu');
         $this->assertSame(true, $shouldSkip, 'Maintenance window should short-circuit collectors');
+    }
+
+    private function assertShouldRunCollectorHonoursConfiguration(): void
+    {
+        // Config-disabled metrics should short-circuit; maintenance mode also forces a skip.
+        $context = [
+            'config' => [
+                'metrics' => ['cpu' => false],
+                'busy_thresholds' => ['load1' => null, 'ping_ms' => null, 'skip_probability' => 0.9],
+                'maintenance_until' => null,
+            ],
+            'paths' => [
+                'log_dir' => sys_get_temp_dir(),
+                'state' => sys_get_temp_dir(),
+            ],
+        ];
+        $this->assertSame(false, shouldRunCollector($context, 'cpu', 'CPU'), 'Disabled metric should not execute collector');
+
+        $context['config']['metrics']['cpu'] = true;
+        $context['config']['maintenance_until'] = time() + 120;
+        $this->assertSame(false, shouldRunCollector($context, 'cpu', 'CPU'), 'Maintenance window should prevent collector run');
+
+        $context['config']['maintenance_until'] = null;
+        $this->assertSame(true, shouldRunCollector($context, 'cpu', 'CPU'), 'Enabled metric without maintenance should execute');
     }
 }

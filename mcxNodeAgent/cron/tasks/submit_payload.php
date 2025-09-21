@@ -13,9 +13,9 @@ use function McxNodeAgent\prepareSubmissionEnvelope;
 use function McxNodeAgent\sendPayload;
 use function McxNodeAgent\profilingDurationMs;
 
-require_once __DIR__ . '/../lib/bootstrap.php';
-require_once __DIR__ . '/../lib/logger.php';
-require_once __DIR__ . '/../lib/submission.php';
+require_once __DIR__ . '/../../lib/bootstrap.php';
+require_once __DIR__ . '/../../lib/logger.php';
+require_once __DIR__ . '/../../lib/submission.php';
 
 $options = parseCliOptions($argv);
 $context = buildContext();

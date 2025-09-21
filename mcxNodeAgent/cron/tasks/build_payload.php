@@ -11,9 +11,9 @@ use function McxNodeAgent\logInfo;
 use function McxNodeAgent\logError;
 use function McxNodeAgent\assemblePayload;
 
-require_once __DIR__ . '/../lib/bootstrap.php';
-require_once __DIR__ . '/../lib/logger.php';
-require_once __DIR__ . '/../lib/payload.php';
+require_once __DIR__ . '/../../lib/bootstrap.php';
+require_once __DIR__ . '/../../lib/logger.php';
+require_once __DIR__ . '/../../lib/payload.php';
 
 $context = buildContext();
 $stateDir = $context['paths']['state'];

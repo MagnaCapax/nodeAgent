@@ -10,13 +10,12 @@ use function McxNodeAgent\writeJson;
 use function McxNodeAgent\logInfo;
 use function McxNodeAgent\logWarn;
 use function McxNodeAgent\profilingDurationMs;
-use function McxNodeAgent\metricEnabled;
 use function McxNodeAgent\ensureCommand;
-use function McxNodeAgent\shouldThrottleCollection;
+use function McxNodeAgent\shouldRunCollector;
 
-require_once __DIR__ . '/../lib/bootstrap.php';
-require_once __DIR__ . '/../lib/logger.php';
-require_once __DIR__ . '/../lib/tooling.php';
+require_once __DIR__ . '/../../lib/bootstrap.php';
+require_once __DIR__ . '/../../lib/logger.php';
+require_once __DIR__ . '/../../lib/tooling.php';
 
 $context = buildContext();
 $config = $context['config'];
@@ -24,12 +23,7 @@ $stateFile = $context['paths']['state'] . '/storage_health.json';
 
 $startedAt = microtime(true);
 
-if (!metricEnabled($config, 'storage_health')) {
-    logInfo($context, 'Storage health collector disabled via configuration; skipping');
-    exit(0);
-}
-
-if (shouldThrottleCollection($context, 'storage_health')) {
+if (!shouldRunCollector($context, 'storage_health', 'Storage health')) {
     exit(0);
 }
 

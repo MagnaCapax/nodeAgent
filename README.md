@@ -17,15 +17,15 @@ Operators retain full control: removing `/opt/mcxNodeAgent` (or `/opt/nodeAgent`
 
 ## Deployment Layout
 The agent should follow a predictable filesystem structure to support cron jobs, logging, and idempotent upgrades:
-- `/opt/mcxNodeAgent/bin/` – executable PHP CLI collectors, submission helpers, and bootstrap scripts.
+- `/opt/mcxNodeAgent/bin/` – standalone CLI utilities (agent multiplexer, installers, requirement inspectors).
 - `/opt/mcxNodeAgent/lib/` – shared PHP helpers (environment detection, parsing, logging primitives).
-- `/opt/mcxNodeAgent/cron/` – cron-safe entrypoints that sequence collectors and submissions.
+- `/opt/mcxNodeAgent/cron/` – cron-safe entrypoints and task scripts (per-collector PHP under cron/tasks/).
 - `/opt/mcxNodeAgent/conf/` – user-editable configuration (endpoints, scheduling knobs, feature flags).
 - `/var/lib/mcxNodeAgent/` – transient caches, lock files, and metric snapshots (configurable via `agent.json`).
 - `/var/log/mcxNodeAgent/` – rotating logs and collector output for local inspection.
 - `/etc/cron.d/mcx-node-agent` – cron schedule installed by the provisioning script.
 
-This repository now ships the scaffolding under `mcxNodeAgent/` mirroring the intended on-host layout. Provisioning routines should copy that tree into `/opt/mcxNodeAgent` as part of installation, preserving executable bits on the PHP entrypoints under `bin/`.
+This repository now ships the scaffolding under `mcxNodeAgent/` mirroring the intended on-host layout. Provisioning routines should copy that tree into `/opt/mcxNodeAgent` as part of installation, preserving executable bits on the PHP entrypoints under `bin/` and `cron/`.
 
 ## Installation
 1. Clone the repository and enter the workspace:
@@ -137,8 +137,8 @@ Select the scheduler that matches your distribution; the agent scripts require o
 
 ## Profiling & Telemetry Envelope
 - Every collector records a `profiling.duration_ms` value in its JSON output, allowing the aggregator to track runtime cost.
-- `build_payload.php` summarises collector timings under `meta.profiling.collectors` and records its own build time.
-- `submit_payload.php` encrypts the payload using GPG symmetric encryption with the passphrase `sha256(primaryIPv4|primaryMAC)`. The submission envelope contains encryption metadata (see `schemas/envelope.schema.json`).
+- `cron/tasks/build_payload.php` summarises collector timings under `meta.profiling.collectors` and records its own build time.
+- `cron/tasks/submit_payload.php` encrypts the payload using GPG symmetric encryption with the passphrase `sha256(primaryIPv4|primaryMAC)`. The submission envelope contains encryption metadata (see `schemas/envelope.schema.json`).
 - When GPG is unavailable the agent sends plaintext, but flags the condition in the envelope metadata while logging a warning.
 - `meta.agent.version` and `meta.agent.build_timestamp` identify the agent revision (pulled from `VERSION` or git metadata) for fleet diagnostics.
 
@@ -179,7 +179,7 @@ Re-running the installer must be safe on partially configured systems and should
   ```
   - `maintenance_until` – ISO8601 timestamp or epoch after which collectors resume automatically.
 - Shared helpers in `/opt/mcxNodeAgent/lib/` expose PHP functions such as `loadConfig()`, `resolvePingTargets()`, and a JSON-safe logging facility emitting to `/var/log/mcxNodeAgent/agent.log` with a state-directory fallback.
-- Collectors write JSON snapshots into `/var/lib/mcxNodeAgent` (or the configured state directory), after which `build_payload.php` assembles a combined payload for `submit_payload.php` to POST.
+- Collectors write JSON snapshots into `/var/lib/mcxNodeAgent` (or the configured state directory), after which `cron/tasks/build_payload.php` assembles a combined payload for `cron/tasks/submit_payload.php` to POST.
 - Schema definitions and narrative field descriptions reside in `schemas/API.md`. Downstream services should track those notes to remain compatible with the agent's payload contract.
 
 ## Distro & Dependency Checks
