@@ -9,7 +9,7 @@ Operators retain full control: removing `/opt/mcxNodeAgent` (or `/opt/nodeAgent`
 - Deliver a single, distro-agnostic toolkit that runs unmodified on Debian, Ubuntu, RHEL, Rocky Linux, Arch, and similar systems.
 - Prioritize privacy by limiting outbound data and keeping detailed logs on the node.
 - Provide high-signal metrics for capacity planning, hardware health, and abuse detection without invasive inspection.
-- Remain KISS-aligned—simple shell tooling, minimal dependencies, and documented fallbacks.
+- Remain KISS-aligned—simple tooling, minimal dependencies, and documented fallbacks.
 - Favor fail-soft behavior: collectors should capture what they can, log gaps, and continue.
 - Autodetect node topology (distro family, outbound IPv4) to configure sensible defaults without user input.
 - Document the collector contract explicitly so downstream tooling stays in sync (`schemas/`).
@@ -206,7 +206,7 @@ Re-running the installer must be safe on partially configured systems and should
 - nodeAgentCollector is maintained in a standalone repository that provides API endpoints, database schemas, and installer helpers to accept agent telemetry. Consult that project’s README for deployment guidance and keep schemas in sync with the copies under `schemas/` here.
 
 ## Development Notes
-- Favor Bash for automation; escalate to PHP only when workflows become unwieldy but remain within repo standards.
+- PHP for logic; shell only as thin glue (see `development/engineering-principles.md`, principle 1).
 - Maintain at least one line of commentary for every ten lines of code to keep complex logic readable.
 - Validate scripts with `shellcheck` and format using `shfmt -w` before submitting patches.
 - Record manual verification steps (e.g., `--help`, `--dry-run`, sample log snippets) in change notes.
